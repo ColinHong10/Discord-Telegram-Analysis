@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Dashboard Design</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-50 font-sans text-slate-800">
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar (Visual only) -->
+        <aside class="w-64 bg-indigo-900 text-white flex flex-col hidden md:flex">
+            <div class="h-16 flex items-center px-6 font-bold text-xl border-b border-indigo-800">
+                <i class="fa-solid fa-chart-pie mr-3"></i> SocialDash
+            </div>
+            <nav class="flex-1 px-4 py-6 space-y-2">
+                <a href="#" onclick="showPage('dashboard')" class="nav-link flex items-center px-4 py-3 bg-indigo-800 rounded-lg text-white"><i class="fa-solid fa-house w-6"></i> Dashboard</a>
+                <a href="#" onclick="showPage('analytics')" class="nav-link flex items-center px-4 py-3 hover:bg-indigo-800 rounded-lg text-indigo-200"><i class="fa-solid fa-chart-line w-6"></i> Peer Analytics</a>
+                <a href="#" onclick="showPage('suggestions')" class="nav-link flex items-center px-4 py-3 hover:bg-indigo-800 rounded-lg text-indigo-200"><i class="fa-solid fa-lightbulb w-6"></i> Suggestions</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto">
+            
+            <!-- Header -->
+            <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shadow-sm">
+                <h1 class="text-2xl font-bold text-slate-800">Overview</h1>
+                <div class="flex items-center space-x-4">
+                    <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-semibold">Pro Plan</span>
+                    <div class="w-10 h-10 bg-slate-300 rounded-full flex items-center justify-center text-white font-bold"><i class="fa-solid fa-user"></i></div>
+                </div>
+            </header>
+
+            <div class="p-8">
+                <!-- Dashboard Content -->
+                <div id="page-dashboard">
+                    <!-- Top Charts Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+
+                    <!-- 1. Weekly Growth -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-center mb-2">
+                            <h2 class="font-bold text-sm">Growth</h2>
+                            <div class="flex gap-1">
+                                <select id="platformSelect" class="bg-slate-50 border border-slate-200 text-xs rounded-md px-2 py-1 outline-none">
+                                    <option value="discord"><i class="fa-brands fa-discord"></i> Discord</option>
+                                    <option value="telegram"><i class="fa-brands fa-telegram"></i> Telegram</option>
+                                </select>
+                                <select id="timeRangeSelect" class="bg-slate-50 border border-slate-200 text-xs rounded-md px-2 py-1 outline-none">
+                                    <option value="week">1 Week</option>
+                                    <option value="twoweeks">2 Weeks</option>
+                                    <option value="month">1 Month</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="height: 120px;">
+                            <canvas id="growthChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- 2. Daily Messages -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                        <h2 class="font-bold text-sm mb-2">Daily Messages</h2>
+                        <div style="height: 120px;">
+                            <canvas id="messagesChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- 3. Languages -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                        <h2 class="font-bold text-sm mb-2">Audience Languages</h2>
+                        <div style="height: 120px;" class="flex justify-center">
+                            <canvas id="languageChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Section: Posts & Analysis (only for dashboard) -->
+                <div id="page-dashboard-bottom" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                    <!-- Posts Sheet -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 lg:col-span-3">
+                        <div class="px-6 py-4 border-b border-slate-100">
+                            <div class="flex flex-wrap justify-between items-center gap-4">
+                                <h2 class="font-bold text-lg">Post Performance</h2>
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <!-- Search -->
+                                    <div class="relative">
+                                        <input type="text" id="postSearch" placeholder="Search posts..." class="pl-9 pr-4 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48">
+                                        <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                    </div>
+                                    <!-- Platform Filter -->
+                                    <select id="filterPlatform" class="px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                        <option value="">All Platforms</option>
+                                        <option value="discord">Discord</option>
+                                        <option value="telegram">Telegram</option>
+                                    </select>
+                                    <!-- Type Filter -->
+                                    <select id="filterType" class="px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                        <option value="">All Types</option>
+                                        <option value="new season content">New Season</option>
+                                        <option value="game/patch news">Patch News</option>
+                                        <option value="social media content">Social</option>
+                                    </select>
+                                    <!-- Sentiment Filter -->
+                                    <select id="filterSentiment" class="px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                        <option value="">All Sentiments</option>
+                                        <option value="positive">Positive</option>
+                                        <option value="neutral">Neutral</option>
+                                        <option value="negative">Negative</option>
+                                    </select>
+                                    <!-- Hot/Latest -->
+                                    <div class="flex rounded-lg overflow-hidden border border-slate-200">
+                                        <button id="btn-hot" class="px-4 py-1.5 text-sm bg-indigo-600 text-white">Hot</button>
+                                        <button id="btn-latest" class="px-4 py-1.5 text-sm bg-white text-slate-600 hover:bg-slate-50">Latest</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-500 text-sm">
+                                        <th class="px-4 py-3 border-b border-slate-200">Platform</th>
+                                        <th class="px-4 py-3 border-b border-slate-200">Type</th>
+                                        <th class="px-4 py-3 border-b border-slate-200">Post Content</th>
+                                        <th class="px-4 py-3 border-b border-slate-200">Engagements</th>
+                                        <th class="px-4 py-3 border-b border-slate-200">Sentiment</th>
+                                        <th class="px-4 py-3 border-b border-slate-200">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="postsTableBody"></tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination -->
+                        <div class="px-6 py-4 border-t border-slate-100 flex justify-between items-center">
+                            <div class="text-sm text-slate-500">
+                                Showing <span id="showingStart" class="font-medium">1</span>-<span id="showingEnd" class="font-medium">10</span> of <span id="totalPosts" class="font-medium">0</span> posts
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button id="btnPrevPage" class="px-3 py-1 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+                                <div id="pageNumbers" class="flex gap-1">
+                                    <!-- Page numbers will be generated here -->
+                                </div>
+                                <button id="btnNextPage" class="px-3 py-1 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Word Cloud Card -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 lg:col-span-1">
+                        <h2 class="font-bold text-sm mb-3 px-4 pt-4 flex items-center">
+                            <i class="fa-solid fa-cloud mr-2 text-indigo-400"></i> Word Cloud
+                        </h2>
+                        <div class="px-4 pb-4">
+                            <div class="relative w-full h-48 flex items-center justify-center">
+                                <!-- Classic Word Cloud Layout -->
+                                <div class="absolute inset-0">
+                                    <span class="absolute text-4xl font-bold text-indigo-600" style="top: 10%; left: 15%;">Update</span>
+                                    <span class="absolute text-3xl font-bold text-green-600" style="top: 20%; left: 50%;">Hero</span>
+                                    <span class="absolute text-5xl font-bold text-indigo-500" style="top: 35%; left: 25%;">Season</span>
+                                    <span class="absolute text-2xl font-semibold text-indigo-400" style="top: 30%; left: 65%;">Map</span>
+                                    <span class="absolute text-3xl font-bold text-orange-500" style="top: 15%; left: 80%;">Patch</span>
+                                    <span class="absolute text-xl font-semibold text-slate-500" style="top: 50%; left: 35%;">Reward</span>
+                                    <span class="absolute text-2xl font-bold text-red-500" style="top: 60%; left: 60%;">Balance</span>
+                                    <span class="absolute text-lg font-semibold text-indigo-300" style="top: 75%; left: 45%;">Quest</span>
+                                    <span class="absolute text-xl font-bold text-green-500" style="top: 45%; left: 75%;">Event</span>
+                                    <span class="absolute text-lg font-semibold text-slate-400" style="top: 70%; left: 85%;">Server</span>
+                                    <span class="absolute text-xl font-bold text-indigo-600" style="top: 25%; left: 40%;">Challenge</span>
+                                    <span class="absolute text-lg font-semibold text-orange-400" style="top: 55%; left: 20%;">Bug</span>
+                                    <span class="absolute text-lg font-semibold text-blue-500" style="top: 40%; left: 70%;">Nerf</span>
+                                    <span class="absolute text-base font-medium text-purple-500" style="top: 65%; left: 80%;">Buff</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Community Topics Card -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 lg:col-span-2">
+                        <h2 class="font-bold text-sm mb-4 px-4 pt-4 flex items-center">
+                            <i class="fa-solid fa-layer-group mr-2 text-indigo-400"></i> Community Topics
+                        </h2>
+                        <div class="px-4 pb-4 space-y-3">
+                            <!-- Combat Balance -->
+                            <div class="border border-slate-100 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="font-bold text-slate-800 flex items-center">
+                                        <span class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center mr-2">
+                                            <i class="fa-solid fa-swords text-red-500 text-sm"></i>
+                                        </span>
+                                        Combat Balance
+                                    </h3>
+                                    <span class="bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full font-semibold">🔥 High</span>
+                                </div>
+                                <div class="space-y-2 text-sm text-slate-600">
+                                    <p>• Players complain about recent hero nerfs being too aggressive</p>
+                                    <p>• Damage reduction makes certain heroes unviable in ranked</p>
+                                    <p>• Request for better matchmaking balance between casual and competitive</p>
+                                    <p>• Meta shifts too frequently, hard to keep up</p>
+                                </div>
+                            </div>
+                            <!-- Game Bugs -->
+                            <div class="border border-slate-100 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="font-bold text-slate-800 flex items-center">
+                                        <span class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center mr-2">
+                                            <i class="fa-solid fa-bug text-yellow-600 text-sm"></i>
+                                        </span>
+                                        Game Bugs
+                                    </h3>
+                                    <span class="bg-yellow-100 text-yellow-600 text-xs px-2 py-1 rounded-full font-semibold">⚠️ Medium</span>
+                                </div>
+                                <div class="space-y-2 text-sm text-slate-600">
+                                    <p>• Crashes on loading screen after Season 2 update</p>
+                                    <p>• Hitbox issues with new heroes causing unfair interactions</p>
+                                    <p>• Audio desync during multiplayer matches</p>
+                                    <p>• FPS drops in specific map areas</p>
+                                </div>
+                            </div>
+                            <!-- Game Economy -->
+                            <div class="border border-slate-100 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="font-bold text-slate-800 flex items-center">
+                                        <span class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center mr-2">
+                                            <i class="fa-solid fa-coins text-amber-500 text-sm"></i>
+                                        </span>
+                                        Game Economy
+                                    </h3>
+                                    <span class="bg-amber-100 text-amber-600 text-xs px-2 py-1 rounded-full font-semibold">📊 Medium</span>
+                                </div>
+                                <div class="space-y-2 text-sm text-slate-600">
+                                    <p>• Currency inflation making rewards feel less valuable</p>
+                                    <p>• Battle pass pricing considered too expensive for content</p>
+                                    <p>• Gold economy feels grindy compared to previous seasons</p>
+                                    <p>• Request for more ways to earn premium currency</p>
+                                </div>
+                            </div>
+                            <!-- Performance -->
+                            <div class="border border-slate-100 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="font-bold text-slate-800 flex items-center">
+                                        <span class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-2">
+                                            <i class="fa-solid fa-gauge-high text-blue-500 text-sm"></i>
+                                        </span>
+                                        Performance
+                                    </h3>
+                                    <span class="bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded-full font-semibold">📉 Low</span>
+                                </div>
+                                <div class="space-y-2 text-sm text-slate-600">
+                                    <p>• Long matchmaking times during peak hours</p>
+                                    <p>• Server lag issues in certain regions</p>
+                                    <p>• Loading screens taking longer than before</p>
+                                </div>
+                            </div>
+                            <!-- Content -->
+                            <div class="border border-slate-100 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="font-bold text-slate-800 flex items-center">
+                                        <span class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-2">
+                                            <i class="fa-solid fa-gamepad text-green-500 text-sm"></i>
+                                        </span>
+                                        Content
+                                    </h3>
+                                    <span class="bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full font-semibold">🎮 Normal</span>
+                                </div>
+                                <div class="space-y-2 text-sm text-slate-600">
+                                    <p>• Excited about new season content and maps</p>
+                                    <p>• Daily quest system well-received by community</p>
+                                    <p>• Request for more variety in weekly challenges</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Steam Reviews Section (Dashboard) -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 mt-6">
+                    <h2 class="font-bold text-lg text-slate-800 mb-6 flex items-center">
+                        <i class="fa-brands fa-steam mr-2 text-blue-500"></i> Steam Reviews - Arena Breakout: Infinite
+                    </h2>
+                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                        <!-- Left: Rating Overview -->
+                        <div class="lg:col-span-1 flex flex-col justify-center">
+                            <div class="text-center">
+                                <p class="text-sm text-slate-500 mb-2">Overall Rating</p>
+                                <div id="ratingPercentage" class="text-6xl font-bold text-green-500 mb-2">72%</div>
+                                <p class="text-sm text-slate-400 mb-4">Positive Reviews</p>
+                                <div class="flex items-center justify-center gap-2 text-sm">
+                                    <span class="text-green-500 font-medium"><i class="fa-solid fa-arrow-up mr-1"></i>+5.2%</span>
+                                    <span class="text-slate-400">vs Last Week</span>
+                                </div>
+                            </div>
+                            <div class="mt-6 space-y-3">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-500">Total Reviews</span>
+                                    <span class="font-medium text-slate-700">12,458</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-500">This Week</span>
+                                    <span class="font-medium text-slate-700">+1,234</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-500">Positive</span>
+                                    <span class="font-medium text-green-600">8,970</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-500">Negative</span>
+                                    <span class="font-medium text-red-600">3,488</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Middle: Daily Review Chart -->
+                        <div class="lg:col-span-2">
+                            <h3 class="text-sm font-medium text-slate-500 mb-4">Daily Reviews This Week</h3>
+                            <div style="height: 220px;">
+                                <canvas id="reviewChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Right: Top 3 Reviews -->
+                        <div class="lg:col-span-1">
+                            <h3 class="text-sm font-medium text-slate-500 mb-4">Top Engagement This Week</h3>
+                            <div class="space-y-3">
+                                <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="text-amber-500 text-xs font-bold">#1</span>
+                                        <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">Positive</span>
+                                    </div>
+                                    <p class="text-xs text-slate-600 mb-2 line-clamp-2">"Best extraction shooter I've played in a while! The gunplay is crisp and the progression system keeps me coming back."</p>
+                                    <div class="flex items-center gap-3 text-xs text-slate-400">
+                                        <span>👍 127</span>
+                                        <span>💬 12</span>
+                                    </div>
+                                </div>
+                                <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="text-amber-500 text-xs font-bold">#2</span>
+                                        <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">Positive</span>
+                                    </div>
+                                    <p class="text-xs text-slate-600 mb-2 line-clamp-2">"Finally a good extraction shooter on Steam! The loot system is satisfying and extracts feel rewarding."</p>
+                                    <div class="flex items-center gap-3 text-xs text-slate-400">
+                                        <span>👍 89</span>
+                                        <span>💬 8</span>
+                                    </div>
+                                </div>
+                                <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="text-amber-500 text-xs font-bold">#3</span>
+                                        <span class="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full">Negative</span>
+                                    </div>
+                                    <p class="text-xs text-slate-600 mb-2 line-clamp-2">"Server issues are killing the experience. Constant disconnects and rubberbanding."</p>
+                                    <div class="flex items-center gap-3 text-xs text-slate-400">
+                                        <span>👎 45</span>
+                                        <span>💬 34</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Post Detail Modal -->
+            <div id="postModal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-50">
+                <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                    <div class="p-6 border-b border-slate-200 flex justify-between items-center sticky top-0 bg-white">
+                        <div class="flex items-center gap-3">
+                            <span id="modalPlatformIcon" class="text-2xl"></span>
+                            <span id="modalPostId" class="text-sm text-slate-500"></span>
+                        </div>
+                        <button onclick="closePostModal()" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+                    </div>
+                    <div class="p-6">
+                        <div id="modalPostContent" class="mb-6 p-4 bg-slate-50 rounded-xl"></div>
+                        <div class="mb-6">
+                            <h3 class="font-bold text-indigo-900 mb-3 flex items-center"><i class="fa-solid fa-wand-magic-sparkles mr-2 text-indigo-400"></i> AI Summary</h3>
+                            <p id="modalAiSummary" class="text-sm text-slate-600 leading-relaxed"></p>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-indigo-900 mb-3 flex items-center"><i class="fa-solid fa-comments mr-2 text-indigo-400"></i> User Comments</h3>
+                            <div id="modalComments" class="space-y-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 关闭postModal -->
+
+            <!-- Peer Analytics Content (放在main内容区) -->
+            <div id="page-peer-analytics" class="hidden">
+                <h1 class="text-2xl font-bold text-slate-800 mb-6">Peer Product Analytics</h1>
+
+                    <!-- 1. 竞品TOP5动态速览 -->
+                    <div class="mb-6">
+                        <h2 class="font-bold text-slate-700 mb-4 flex items-center">
+                            <i class="fa-solid fa-trophy mr-2 text-amber-500"></i> Top 5 Competitors
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                            <!-- Arc Raiders -->
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 text-center">
+                                <div class="w-12 h-12 bg-gradient-to-br from-purple-600 to-indigo-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fa-solid fa-robot text-xl text-white"></i>
+                                </div>
+                                <h3 class="font-bold text-slate-800">Arc Raiders</h3>
+                                <p class="text-sm text-slate-500">v1.2.0 Live</p>
+                                <div class="mt-2 flex items-center gap-2">
+                                    <span class="text-xs text-green-600 font-medium"><i class="fa-solid fa-arrow-up mr-1"></i>+18%</span>
+                                    <span class="text-xs text-slate-400">This Week</span>
+                                </div>
+                            </div>
+                            <!-- Delta Force -->
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 text-center">
+                                <div class="w-12 h-12 bg-gradient-to-br from-green-600 to-emerald-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fa-solid fa-crosshairs text-xl text-white"></i>
+                                </div>
+                                <h3 class="font-bold text-slate-800">Delta Force</h3>
+                                <p class="text-sm text-slate-500">v3.1.0 Live</p>
+                                <div class="mt-2 flex items-center gap-2">
+                                    <span class="text-xs text-green-600 font-medium"><i class="fa-solid fa-arrow-up mr-1"></i>+12%</span>
+                                    <span class="text-xs text-slate-400">This Week</span>
+                                </div>
+                            </div>
+                            <!-- Marathon -->
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 text-center">
+                                <div class="w-12 h-12 bg-gradient-to-br from-cyan-600 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fa-solid fa-rocket text-xl text-white"></i>
+                                </div>
+                                <h3 class="font-bold text-slate-800">Marathon</h3>
+                                <p class="text-sm text-slate-500">Beta</p>
+                                <div class="mt-2 flex items-center gap-2">
+                                    <span class="text-xs text-green-600 font-medium"><i class="fa-solid fa-arrow-up mr-1"></i>+25%</span>
+                                    <span class="text-xs text-slate-400">This Week</span>
+                                </div>
+                            </div>
+                            <!-- PUBG: Black Budget -->
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 text-center">
+                                <div class="w-12 h-12 bg-gradient-to-br from-amber-600 to-orange-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fa-solid fa-person-military-rifle text-xl text-white"></i>
+                                </div>
+                                <h3 class="font-bold text-slate-800">PUBG: BB</h3>
+                                <p class="text-sm text-slate-500">v1.0 Demo</p>
+                                <div class="mt-2 flex items-center gap-2">
+                                    <span class="text-xs text-yellow-600 font-medium"><i class="fa-solid fa-minus mr-1"></i>0%</span>
+                                    <span class="text-xs text-slate-400">This Week</span>
+                                </div>
+                            </div>
+                            <!-- Arena Breakout: Infinite (Our Game) -->
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 text-center">
+                                <div class="w-12 h-12 bg-gradient-to-br from-red-600 to-rose-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fa-solid fa-crosshairs text-xl text-white"></i>
+                                </div>
+                                <h3 class="font-bold text-slate-800">ABI</h3>
+                                <p class="text-sm text-slate-500">v2.1.3 Live</p>
+                                <div class="mt-2 flex items-center gap-2">
+                                    <span class="text-xs text-green-600 font-medium"><i class="fa-solid fa-arrow-up mr-1"></i>+8%</span>
+                                    <span class="text-xs text-slate-400">This Week</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. 竞品产品版本动态 -->
+                    <div class="mb-6">
+                        <h2 class="font-bold text-slate-700 mb-4 flex items-center">
+                            <i class="fa-solid fa-code-branch mr-2 text-blue-500"></i> Competitor Versions
+                        </h2>
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                            <table class="w-full text-left">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-500 text-sm">
+                                        <th class="px-4 py-3 border-b border-slate-200">Product</th>
+                                        <th class="px-4 py-3 border-b border-slate-200">Version</th>
+                                        <th class="px-4 py-3 border-b border-slate-200">Release Date</th>
+                                        <th class="px-4 py-3 border-b border-slate-200">Update Content</th>
+                                        <th class="px-4 py-3 border-b border-slate-200">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-sm">
+                                    <tr class="border-b border-slate-100">
+                                        <td class="px-4 py-3 font-medium text-purple-600">Arc Raiders</td>
+                                        <td class="px-4 py-3">v1.2.0</td>
+                                        <td class="px-4 py-3">Jan 15, 2024</td>
+                                        <td class="px-4 py-3">New extraction map, weapon skins, event</td>
+                                        <td><span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">Live</span></td>
+                                    </tr>
+                                    <tr class="border-b border-slate-100">
+                                        <td class="px-4 py-3 font-medium text-green-600">Delta Force</td>
+                                        <td class="px-4 py-3">v3.1.0</td>
+                                        <td class="px-4 py-3">Jan 12, 2024</td>
+                                        <td class="px-4 py-3">New PvP mode, weapon balance, UI update</td>
+                                        <td><span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">Live</span></td>
+                                    </tr>
+                                    <tr class="border-b border-slate-100">
+                                        <td class="px-4 py-3 font-medium text-cyan-600">Marathon</td>
+                                        <td class="px-4 py-3">Beta</td>
+                                        <td class="px-4 py-3">Jan 10, 2024</td>
+                                        <td class="px-4 py-3">Closed beta test, new abilities</td>
+                                        <td><span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded-full font-medium">Beta</span></td>
+                                    </tr>
+                                    <tr class="border-b border-slate-100">
+                                        <td class="px-4 py-3 font-medium text-amber-600">PUBG: BB</td>
+                                        <td class="px-4 py-3">v1.0 Demo</td>
+                                        <td class="px-4 py-3">Jan 08, 2024</td>
+                                        <td class="px-4 py-3">Public demo, core gameplay test</td>
+                                        <td><span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full font-medium">Demo</span></td>
+                                    </tr>
+                                    <tr class="border-b border-slate-100">
+                                        <td class="px-4 py-3 font-medium text-red-600">ABI (Us)</td>
+                                        <td class="px-4 py-3">v2.1.3</td>
+                                        <td class="px-4 py-3">Jan 28, 2024</td>
+                                        <td class="px-4 py-3">Hotfix, performance improvements, bug fixes</td>
+                                        <td><span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">Live</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 3. KOL相关动态 -->
+                    <div class="mb-6">
+                        <h2 class="font-bold text-slate-700 mb-4 flex items-center">
+                            <i class="fa-solid fa-star mr-2 text-yellow-500"></i> KOL & Influencer Activity
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Peanut -->
+                            <div class="bg-white rounded-xl shadow-sm border border-slate-100">
+                                <div class="p-4 border-b border-slate-100">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="flex items-center gap-2">
+                                            <img src="https://ui-avatars.com/api/?name=Peanut&background=10b981&color=fff&size=40&font-size=0.4&bold=true" class="w-10 h-10 rounded-full">
+                                            <span class="bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full font-medium">🔥 Trending</span>
+                                        </div>
+                                        <span class="text-xs text-slate-400">520K Followers</span>
+                                    </div>
+                                </div>
+                                <div class="p-4">
+                                    <p class="text-sm font-medium text-slate-800 mb-2">Latest: "ABI new update is insane! The new weapons feel amazing 🎯 Extraction shooters just hit different"</p>
+                                    <div class="space-y-2">
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <i class="fa-solid fa-heart text-red-400"></i>
+                                            <span class="text-slate-600">24.5K likes</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <i class="fa-solid fa-comment text-slate-400"></i>
+                                            <span class="text-slate-600">1.8K comments</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full font-medium">82% Positive</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Shroud -->
+                            <div class="bg-white rounded-xl shadow-sm border border-slate-100">
+                                <div class="p-4 border-b border-slate-100">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="flex items-center gap-2">
+                                            <img src="https://ui-avatars.com/api/?name=Shroud&background=6366f1&color=fff&size=40&font-size=0.4&bold=true" class="w-10 h-10 rounded-full">
+                                            <span class="bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full font-medium">⬆️ Rising</span>
+                                        </div>
+                                        <span class="text-xs text-slate-400">3.2M Followers</span>
+                                    </div>
+                                </div>
+                                <div class="p-4">
+                                    <p class="text-sm font-medium text-slate-800 mb-2">Latest: "Just tried Arena Breakout Infinite - smooth gameplay but needs more content. Give it a few months"</p>
+                                    <div class="space-y-2">
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <i class="fa-solid fa-heart text-red-400"></i>
+                                            <span class="text-slate-600">45.2K likes</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <i class="fa-solid fa-comment text-slate-400"></i>
+                                            <span class="text-slate-600">3.4K comments</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <span class="text-xs bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full font-medium">55% Positive</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Lvndmark -->
+                            <div class="bg-white rounded-xl shadow-sm border-slate-100">
+                                <div class="p-4 border-b border-slate-100">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="flex items-center gap-2">
+                                            <img src="https://ui-avatars.com/api/?name=Lvndmark&background=ef4444&color=fff&size=40&font-size=0.4&bold=true" class="w-10 h-10 rounded-full">
+                                            <span class="bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded-full font-medium">🎮 Gaming</span>
+                                        </div>
+                                        <span class="text-xs text-slate-400">890K Followers</span>
+                                    </div>
+                                </div>
+                                <div class="p-4">
+                                    <p class="text-sm font-medium text-slate-800 mb-2">Latest: "ABI extraction mechanic is clean! Way better than Arc Raiders. Fast extracts ftw 🏃‍♂️💨"</p>
+                                    <div class="space-y-2">
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <i class="fa-solid fa-heart text-red-400"></i>
+                                            <span class="text-slate-600">18.9K likes</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <i class="fa-solid fa-comment text-slate-400"></i>
+                                            <span class="text-slate-600">2.1K comments</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full font-medium">78% Positive</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. 赛道宏观与商业情报 -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-100">
+                            <h2 class="font-bold text-slate-700 mb-4 flex items-center">
+                                <i class="fa-solid fa-globe mr-2 text-indigo-500"></i> Market Overview
+                            </h2>
+                            <div class="space-y-4">
+                                <div class="border border-slate-100 rounded-lg p-4">
+                                    <h3 class="text-sm font-semibold text-slate-800 mb-2">Market Size</h3>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="text-center">
+                                            <p class="text-3xl font-bold text-indigo-600">$4.2B</p>
+                                            <p class="text-sm text-slate-500">Global Market</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <p class="text-3xl font-bold text-green-600">+18.5%</p>
+                                            <p class="text-sm text-slate-500">YoY Growth</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="border border-slate-100 rounded-lg p-4">
+                                    <h3 class="text-sm font-semibold text-slate-800 mb-2">Market Share</h3>
+                                    <div class="space-y-2">
+                                        <div>
+                                            <div class="flex justify-between mb-1"><span>Our Game</span> <span class="font-bold text-indigo-600">12.3%</span></div>
+                                            <div class="w-full bg-slate-100 rounded-full h-3"><div class="bg-indigo-500 h-3 rounded-full" style="width: 12.3%"></div></div>
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between mb-1"><span>Game A</span> <span class="font-bold text-red-500">28.7%</span></div>
+                                            <div class="w-full bg-slate-100 rounded-full h-3"><div class="bg-red-500 h-3 rounded-full" style="width: 28.7%"></div></div>
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between mb-1"><span>Game B</span> <span class="font-bold text-blue-500">24.1%</span></div>
+                                            <div class="w-full bg-slate-100 rounded-full h-3"><div class="bg-blue-500 h-3 rounded-full" style="width: 24.1%"></div></div>
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between mb-1"><span>Game C</span> <span class="font-bold text-purple-500">18.5%</span></div>
+                                            <div class="w-full bg-slate-100 rounded-full h-3"><div class="bg-purple-500 h-3 rounded-full" style="width: 18.5%"></div></div>
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between mb-1"><span>Others</span> <span class="font-bold text-slate-400">16.4%</span></div>
+                                            <div class="w-full bg-slate-100 rounded-full h-3"><div class="bg-slate-400 h-3 rounded-full" style="width: 16.4%"></div></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-100">
+                            <h2 class="font-bold text-slate-700 mb-4 flex items-center">
+                                <i class="fa-solid fa-lightbulb mr-2 text-amber-500"></i> Key Insights
+                            </h2>
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-3">
+                                    <span class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <i class="fa-solid fa-check text-green-600"></i>
+                                    </span>
+                                    <div>
+                                        <p class="text-sm font-medium text-slate-800">Battle Royale trend accelerating</p>
+                                        <p class="text-sm text-slate-500">3 major competitors launched BR modes last quarter</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <i class="fa-solid fa-xmark text-red-600"></i>
+                                    </span>
+                                    <div>
+                                        <p class="text-sm font-medium text-slate-800">Monetization concern rising</p>
+                                        <p class="text-sm text-slate-500">Community feedback indicates economy inflation issues</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <i class="fa-solid fa-chart-line text-blue-600"></i>
+                                    </span>
+                                    <div>
+                                        <p class="text-sm font-medium text-slate-800">Mobile segment still underpenetrated</p>
+                                        <p class="text-sm text-slate-500">Opportunity: Mobile-first competitors growing 35% faster</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+
+            <!-- Suggestions Page -->
+            <div id="page-suggestions" class="hidden">
+                <h1 class="text-2xl font-bold text-slate-800 mb-6">Player Suggestions</h1>
+
+                <!-- Hot Topics -->
+                <div class="mb-6">
+                    <h2 class="font-bold text-slate-700 mb-4 flex items-center">
+                        <i class="fa-solid fa-fire mr-2 text-orange-500"></i> Hot Topics
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                        <div class="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl p-4 text-white">
+                            <p class="text-sm opacity-90">Most Discussed</p>
+                            <p class="text-xl font-bold">Weapon Balance</p>
+                            <p class="text-2xl font-bold mt-2">234 suggestions</p>
+                        </div>
+                        <div class="bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl p-4 text-white">
+                            <p class="text-sm opacity-90">Trending</p>
+                            <p class="text-xl font-bold">Server Performance</p>
+                            <p class="text-2xl font-bold mt-2">189 suggestions</p>
+                        </div>
+                        <div class="bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl p-4 text-white">
+                            <p class="text-sm opacity-90">Growing</p>
+                            <p class="text-xl font-bold">New Maps</p>
+                            <p class="text-2xl font-bold mt-2">156 suggestions</p>
+                        </div>
+                        <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl p-4 text-white">
+                            <p class="text-sm opacity-90">Active</p>
+                            <p class="text-xl font-bold">Battle Pass</p>
+                            <p class="text-2xl font-bold mt-2">98 suggestions</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOP 5 Suggestions -->
+                <div class="mb-6">
+                    <h2 class="font-bold text-slate-700 mb-4 flex items-center">
+                        <i class="fa-solid fa-trophy mr-2 text-amber-500"></i> Top 5 Suggestions
+                    </h2>
+                    <div class="space-y-4" id="suggestionsList">
+                        <!-- Suggestion 1 -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="toggleSuggestion(this)">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center text-white font-bold text-sm">#1</span>
+                                    <div>
+                                        <h3 class="font-semibold text-slate-800">Add more weapon attachment options</h3>
+                                        <p class="text-sm text-slate-500 mt-1 suggestion-preview">Currently only 3 attachments per weapon is too limiting. We need more slots and customization options...</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4 text-sm text-slate-500">
+                                    <span><i class="fa-solid fa-thumbs-up mr-1"></i> 456</span>
+                                    <span><i class="fa-solid fa-comment mr-1"></i> 89</span>
+                                    <i class="fa-solid fa-chevron-down transition-transform"></i>
+                                </div>
+                            </div>
+                            <div class="suggestion-full hidden mt-4 pt-4 border-t border-slate-100">
+                                <div class="bg-indigo-50 rounded-lg p-4 mb-4">
+                                    <h4 class="font-semibold text-indigo-900 mb-2"><i class="fa-solid fa-robot mr-2"></i>AI Summary</h4>
+                                    <p class="text-sm text-indigo-800">Players are requesting more weapon customization options. The current 3-attachment system feels limiting compared to competitors. Community suggests adding 5 slots and more unique attachments like laser sights and tactical grips. This would increase gameplay depth and player engagement.</p>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="p-3 bg-slate-50 rounded-lg">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="w-6 h-6 bg-indigo-200 rounded-full flex items-center justify-center text-xs font-bold text-indigo-600">S</span>
+                                            <span class="font-medium text-sm text-slate-700">SniperElite99</span>
+                                        </div>
+                                        <p class="text-sm text-slate-600">"Please add more scopes! The current selection is boring compared to other extraction shooters."</p>
+                                    </div>
+                                    <div class="p-3 bg-slate-50 rounded-lg">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center text-xs font-bold text-blue-600">G</span>
+                                            <span class="font-medium text-sm text-slate-700">GunMaster_X</span>
+                                        </div>
+                                        <p class="text-sm text-slate-600">"5 attachments minimum would make builds much more interesting. Also add armor-piercing rounds!"</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Suggestion 2 -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="toggleSuggestion(this)">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-8 h-8 bg-slate-400 rounded-full flex items-center justify-center text-white font-bold text-sm">#2</span>
+                                    <div>
+                                        <h3 class="font-semibold text-slate-800">Improve server stability and reduce latency</h3>
+                                        <p class="text-sm text-slate-500 mt-1 suggestion-preview">Server disconnects during extraction are frustrating. Need better server infrastructure...</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4 text-sm text-slate-500">
+                                    <span><i class="fa-solid fa-thumbs-up mr-1"></i> 389</span>
+                                    <span><i class="fa-solid fa-comment mr-1"></i> 124</span>
+                                    <i class="fa-solid fa-chevron-down transition-transform"></i>
+                                </div>
+                            </div>
+                            <div class="suggestion-full hidden mt-4 pt-4 border-t border-slate-100">
+                                <div class="bg-indigo-50 rounded-lg p-4 mb-4">
+                                    <h4 class="font-semibold text-indigo-900 mb-2"><i class="fa-solid fa-robot mr-2"></i>AI Summary</h4>
+                                    <p class="text-sm text-indigo-800">Server performance is a major concern. Players experience rubberbanding and disconnections, especially during peak hours. Suggestion to add more server regions and implement better tick rates. High priority issue affecting player retention.</p>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="p-3 bg-slate-50 rounded-lg">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="w-6 h-6 bg-red-200 rounded-full flex items-center justify-center text-xs font-bold text-red-600">L</span>
+                                            <span class="font-medium text-sm text-slate-700">LagSpike_PRO</span>
+                                        </div>
+                                        <p class="text-sm text-slate-600">"Lost a 50k loadout last night due to server crash. This needs to be fixed ASAP!"</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Suggestion 3 -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="toggleSuggestion(this)">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-8 h-8 bg-amber-700 rounded-full flex items-center justify-center text-white font-bold text-sm">#3</span>
+                                    <div>
+                                        <h3 class="font-semibold text-slate-800">Add new extraction points to existing maps</h3>
+                                        <p class="text-sm text-slate-500 mt-1 suggestion-preview">Current extraction points are too predictable. Add more variety and hidden extraction routes...</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4 text-sm text-slate-500">
+                                    <span><i class="fa-solid fa-thumbs-up mr-1"></i> 312</span>
+                                    <span><i class="fa-solid fa-comment mr-1"></i> 67</span>
+                                    <i class="fa-solid fa-chevron-down transition-transform"></i>
+                                </div>
+                            </div>
+                            <div class="suggestion-full hidden mt-4 pt-4 border-t border-slate-100">
+                                <div class="bg-indigo-50 rounded-lg p-4 mb-4">
+                                    <h4 class="font-semibold text-indigo-900 mb-2"><i class="fa-solid fa-robot mr-2"></i>AI Summary</h4>
+                                    <p class="text-sm text-indigo-800">Players want more strategic extraction options. Current fixed extraction points make camping too easy. Suggestion for dynamic extraction points that change daily, plus hidden secret extractions that require specific conditions.</p>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="p-3 bg-slate-50 rounded-lg">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="w-6 h-6 bg-green-200 rounded-full flex items-center justify-center text-xs font-bold text-green-600">E</span>
+                                            <span class="font-medium text-sm text-slate-700">ExtractionExpert</span>
+                                        </div>
+                                        <p class="text-sm text-slate-600">"Secret extracts would add so much more depth to the gameplay. Maybe require a specific item to unlock?"</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Suggestion 4 -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="toggleSuggestion(this)">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-8 h-8 bg-slate-300 rounded-full flex items-center justify-center text-white font-bold text-sm">#4</span>
+                                    <div>
+                                        <h3 class="font-semibold text-slate-800">Rework the battle pass progression system</h3>
+                                        <p class="text-sm text-slate-500 mt-1 suggestion-preview">Current XP requirements are too grindy. Make it more accessible for casual players...</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4 text-sm text-slate-500">
+                                    <span><i class="fa-solid fa-thumbs-up mr-1"></i> 278</span>
+                                    <span><i class="fa-solid fa-comment mr-1"></i> 156</span>
+                                    <i class="fa-solid fa-chevron-down transition-transform"></i>
+                                </div>
+                            </div>
+                            <div class="suggestion-full hidden mt-4 pt-4 border-t border-slate-100">
+                                <div class="bg-indigo-50 rounded-lg p-4 mb-4">
+                                    <h4 class="font-semibold text-indigo-900 mb-2"><i class="fa-solid fa-robot mr-2"></i>AI Summary</h4>
+                                    <p class="text-sm text-indigo-800">Battle pass is perceived as too time-consuming. Players suggest adding weekly challenges with bonus XP, and reducing daily quest requirements. Many feel the free track should offer more rewards to improve retention.</p>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="p-3 bg-slate-50 rounded-lg">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="w-6 h-6 bg-purple-200 rounded-full flex items-center justify-center text-xs font-bold text-purple-600">B</span>
+                                            <span class="font-medium text-sm text-slate-700">BPGrinder</span>
+                                        </div>
+                                        <p class="text-sm text-slate-600">"I play 2 hours daily and can't complete the BP. Something is wrong with the XP curve."</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Suggestion 5 -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="toggleSuggestion(this)">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-8 h-8 bg-slate-300 rounded-full flex items-center justify-center text-white font-bold text-sm">#5</span>
+                                    <div>
+                                        <h3 class="font-semibold text-slate-800">Add cross-platform progression</h3>
+                                        <p class="text-sm text-slate-500 mt-1 suggestion-preview">PC and console players can't share progress. This splits the community significantly...</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4 text-sm text-slate-500">
+                                    <span><i class="fa-solid fa-thumbs-up mr-1"></i> 245</span>
+                                    <span><i class="fa-solid fa-comment mr-1"></i> 78</span>
+                                    <i class="fa-solid fa-chevron-down transition-transform"></i>
+                                </div>
+                            </div>
+                            <div class="suggestion-full hidden mt-4 pt-4 border-t border-slate-100">
+                                <div class="bg-indigo-50 rounded-lg p-4 mb-4">
+                                    <h4 class="font-semibold text-indigo-900 mb-2"><i class="fa-solid fa-robot mr-2"></i>AI Summary</h4>
+                                    <p class="text-sm text-indigo-800">Cross-platform play and progression is highly requested. Players want to continue progress across devices. This would also help with matchmaking times on console. Technical implementation is complex but highly valued by community.</p>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="p-3 bg-slate-50 rounded-lg">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="w-6 h-6 bg-cyan-200 rounded-full flex items-center justify-center text-xs font-bold text-cyan-600">M</span>
+                                            <span class="font-medium text-sm text-slate-700">MultiPlatformGamer</span>
+                                        </div>
+                                        <p class="text-sm text-slate-600">"Bought the game on PC but want to play on Steam Deck sometimes. Progress sync please!"</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+    <!-- Chart.js Initialization -->
+    <script>
+        // Page Navigation
+        function showPage(page) {
+            const dashboard = document.getElementById('page-dashboard');
+            const dashboardBottom = document.getElementById('page-dashboard-bottom');
+            const analytics = document.getElementById('page-peer-analytics');
+            const suggestions = document.getElementById('page-suggestions');
+
+            // Update nav styles
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('bg-indigo-800');
+                link.classList.add('hover:bg-indigo-800');
+            });
+
+            // Hide all pages first
+            dashboard.classList.add('hidden');
+            dashboardBottom.classList.add('hidden');
+            analytics.classList.add('hidden');
+            suggestions.classList.add('hidden');
+
+            // Show/hide pages
+            if (page === 'dashboard') {
+                dashboard.classList.remove('hidden');
+                dashboardBottom.classList.remove('hidden');
+                document.querySelectorAll('.nav-link')[0].classList.add('bg-indigo-800');
+                document.querySelectorAll('.nav-link')[0].classList.remove('hover:bg-indigo-800');
+            } else if (page === 'analytics') {
+                analytics.classList.remove('hidden');
+                document.querySelectorAll('.nav-link')[1].classList.add('bg-indigo-800');
+                document.querySelectorAll('.nav-link')[1].classList.remove('hover:bg-indigo-800');
+            } else if (page === 'suggestions') {
+                suggestions.classList.remove('hidden');
+                document.querySelectorAll('.nav-link')[2].classList.add('bg-indigo-800');
+                document.querySelectorAll('.nav-link')[2].classList.remove('hover:bg-indigo-800');
+            }
+        }
+
+        // Toggle suggestion expand/collapse
+        function toggleSuggestion(element) {
+            const fullContent = element.querySelector('.suggestion-full');
+            const chevron = element.querySelector('.fa-chevron-down');
+
+            if (fullContent.classList.contains('hidden')) {
+                fullContent.classList.remove('hidden');
+                chevron.classList.add('rotate-180');
+            } else {
+                fullContent.classList.add('hidden');
+                chevron.classList.remove('rotate-180');
+            }
+        }
+
+        // Growth data by platform and time range
+        const growthData = {
+            discord: {
+                week: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    data: [85, 120, 95, 150, 180, 220, 195]
+                },
+                twoweeks: {
+                    labels: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9', 'W10', 'W11', 'W12', 'W13', 'W14'],
+                    data: [85, 120, 95, 150, 180, 220, 195, 250, 280, 310, 290, 340, 380, 420]
+                },
+                month: {
+                    labels: ['Jan 1', 'Jan 5', 'Jan 10', 'Jan 15', 'Jan 20', 'Jan 25', 'Jan 30'],
+                    data: [150, 320, 580, 920, 1250, 1580, 1950]
+                }
+            },
+            telegram: {
+                week: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    data: [120, 180, 165, 220, 280, 340, 310]
+                },
+                twoweeks: {
+                    labels: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9', 'W10', 'W11', 'W12', 'W13', 'W14'],
+                    data: [120, 180, 165, 220, 280, 340, 310, 380, 450, 520, 480, 560, 640, 720]
+                },
+                month: {
+                    labels: ['Jan 1', 'Jan 5', 'Jan 10', 'Jan 15', 'Jan 20', 'Jan 25', 'Jan 30'],
+                    data: [200, 450, 820, 1350, 1900, 2480, 3100]
+                }
+            }
+        };
+
+        let growthChart;
+
+        function updateGrowthChart() {
+            const platform = document.getElementById('platformSelect').value;
+            const timeRange = document.getElementById('timeRangeSelect').value;
+            const data = growthData[platform][timeRange];
+
+            growthChart.data.labels = data.labels;
+            growthChart.data.datasets[0].data = data.data;
+            growthChart.update();
+        }
+
+        // 1. Growth Line Chart
+        growthChart = new Chart(document.getElementById('growthChart'), {
+            type: 'line',
+            data: {
+                labels: growthData.discord.week.labels,
+                datasets: [{
+                    label: 'Followers Gained',
+                    data: growthData.discord.week.data,
+                    borderColor: '#4f46e5',
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { ticks: { font: { size: 10 }, maxRotation: 45, minRotation: 45 }, grid: { display: false } },
+                    y: { ticks: { font: { size: 10 } }, grid: { color: '#f1f5f9' } }
+                }
+            }
+        });
+
+        // Event listeners for dropdowns
+        document.getElementById('platformSelect').addEventListener('change', updateGrowthChart);
+        document.getElementById('timeRangeSelect').addEventListener('change', updateGrowthChart);
+
+        // 2. Messages Bar Chart - Thinner bars, more prominent Y-axis
+        new Chart(document.getElementById('messagesChart'), {
+            type: 'bar',
+            data: {
+                labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+                datasets: [
+                    { label: 'Sent', data: [8, 15, 12, 18, 14, 6, 9], backgroundColor: '#818cf8', borderRadius: 3, barPercentage: 0.4 },
+                    { label: 'Received', data: [32, 48, 42, 65, 58, 35, 28], backgroundColor: '#e2e8f0', borderRadius: 3, barPercentage: 0.4 }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { stacked: true, ticks: { font: { size: 10 } }, grid: { display: false } },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: { font: { size: 10 }, stepSize: 20 },
+                        grid: { color: '#e2e8f0', drawBorder: false }
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // 3. Language Pie Chart
+        new Chart(document.getElementById('languageChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['En', 'Es', 'Zh', 'Other'],
+                datasets: [{
+                    data: [65, 20, 10, 5],
+                    backgroundColor: ['#4f46e5', '#ec4899', '#06b6d4', '#cbd5e1'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'right',
+                        labels: { boxWidth: 8, font: { size: 10 }, padding: 8 }
+                    }
+                }
+            }
+        });
+
+        // 4. Steam Reviews Bar Chart (Positive/Negative)
+        new Chart(document.getElementById('reviewChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [
+                    {
+                        label: 'Positive',
+                        data: [45, 62, 58, 75, 89, 120, 95],
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 4,
+                        barPercentage: 0.6
+                    },
+                    {
+                        label: 'Negative',
+                        data: [-12, -18, -15, -22, -28, -35, -20],
+                        backgroundColor: '#ef4444',
+                        borderRadius: 4,
+                        barPercentage: 0.6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        stacked: true,
+                        ticks: { font: { size: 11 } },
+                        grid: { display: false }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        ticks: {
+                            font: { size: 11 },
+                            callback: function(value) {
+                                return Math.abs(value);
+                            }
+                        },
+                        grid: { color: '#e2e8f0' }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 15,
+                            font: { size: 11 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + Math.abs(context.raw);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Update rating color based on percentage
+        function updateRatingColor() {
+            const rating = 72;
+            const ratingElement = document.getElementById('ratingPercentage');
+            if (rating >= 70) {
+                ratingElement.className = 'text-6xl font-bold text-green-500 mb-2';
+                ratingElement.textContent = '72%';
+            } else if (rating >= 50) {
+                ratingElement.className = 'text-6xl font-bold text-yellow-500 mb-2';
+                ratingElement.textContent = '72%';
+            } else {
+                ratingElement.className = 'text-6xl font-bold text-red-500 mb-2';
+                ratingElement.textContent = '72%';
+            }
+        }
+        updateRatingColor();
+
+        // Post data for modal
+        const postsData = {
+            discord: {
+                1: {
+                    icon: '<i class="fa-brands fa-discord"></i>',
+                    color: 'text-indigo-500',
+                    type: 'new season content',
+                    typeLabel: 'New Season',
+                    shortContent: 'Season 2 update is live! 🎮 New heroes, new maps, and...',
+                    sentiment: { positive: 75, neutral: 20, negative: 5 },
+                    commentCount: 45,
+                    likes: 1200,
+                    timestamp: '2024-01-28T10:00:00',
+                    title: 'Season 2 update is live!',
+                    content: 'Season 2 update is live! 🎮 New heroes, new maps, and a battle pass with exclusive rewards. Update now and join the fun! #Season2 #Update',
+                    summary: 'Players are excited about the new heroes and maps. The battle pass rewards are well-received, though some are asking about the pricing tier details.',
+                    comments: [
+                        { user: 'DragonSlayer', text: 'FINALLY! The new hero looks OP lol 🐉' },
+                        { user: 'NightOwl', text: 'Can someone explain the battle pass tiers?' },
+                        { user: 'PixelKnight', text: 'Best update yet, devs! Keep it up! 🔥' }
+                    ]
+                },
+                3: {
+                    icon: '<i class="fa-brands fa-discord"></i>',
+                    color: 'text-indigo-500',
+                    type: 'game/patch news',
+                    typeLabel: 'Patch News',
+                    shortContent: 'Server maintenance scheduled for tomorrow 3 AM UTC...',
+                    sentiment: { positive: 40, neutral: 45, negative: 15 },
+                    commentCount: 12,
+                    likes: 400,
+                    timestamp: '2024-01-30T08:00:00',
+                    title: 'Server maintenance',
+                    content: 'Server maintenance scheduled for tomorrow 3 AM UTC. Expected downtime: 2 hours. We apologize for any inconvenience.',
+                    summary: 'Most users are understanding about the maintenance. Some are concerned about the timing affecting their gameplay, especially players in different time zones.',
+                    comments: [
+                        { user: 'ShadowBlade', text: '3 AM UTC is perfect for me, no issues!' },
+                        { user: 'CasualPlayer', text: 'Any compensation for the downtime?' },
+                        { user: 'Moderator_Jane', text: 'Yes, all players will receive a bonus crate!' }
+                    ]
+                },
+                4: {
+                    icon: '<i class="fa-brands fa-discord"></i>',
+                    color: 'text-indigo-500',
+                    type: 'game/patch news',
+                    typeLabel: 'Patch News',
+                    shortContent: 'Hotfix 2.1.3 released - nerfed hero balance...',
+                    timestamp: '2024-01-25T14:00:00',
+                    title: 'Hotfix 2.1.3 Released',
+                    content: 'Hotfix 2.1.3 released - nerfed hero balance adjustments. We appreciate your feedback and are monitoring closely.',
+                    summary: 'Players are upset about the hero nerfs. Many feel the changes are too drastic and unbalanced.',
+                    sentiment: { positive: 5, neutral: 15, negative: 80 },
+                    commentCount: 250,
+                    likes: 180,
+                    comments: [
+                        { user: 'RageQuit', text: 'This is ridiculous, you killed the game!' },
+                        { user: 'BalancePlease', text: 'Why nerf the only fun hero?' },
+                        { user: 'DevsDontCare', text: 'Uninstalling, bye losers' }
+                    ]
+                }
+            },
+            telegram: {
+                2: {
+                    icon: '<i class="fa-brands fa-telegram"></i>',
+                    color: 'text-blue-400',
+                    type: 'social media content',
+                    typeLabel: 'Social',
+                    shortContent: 'Community challenge starts now! Complete daily quests to earn...',
+                    sentiment: { positive: 80, neutral: 15, negative: 5 },
+                    commentCount: 120,
+                    likes: 3400,
+                    timestamp: '2024-01-29T16:00:00',
+                    title: 'Community challenge starts now!',
+                    content: 'Community challenge starts now! Complete daily quests to earn exclusive rewards. First 1000 participants get a special badge! 🏆',
+                    summary: 'High engagement from the community. Users are actively sharing progress and helping each other complete quests. The exclusive badge is driving participation.',
+                    comments: [
+                        { user: 'QuestMaster', text: 'Already on day 3! This is so fun! 🎯' },
+                        { user: 'RewardHunter', text: 'Do the badges stack with previous event badges?' },
+                        { user: 'CommunityMod', text: 'Yes! You can wear multiple event badges 👍' }
+                    ]
+                },
+                // More posts for pagination testing
+                5: {
+                    icon: '<i class="fa-brands fa-discord"></i>',
+                    color: 'text-indigo-500',
+                    type: 'new season content',
+                    typeLabel: 'New Season',
+                    shortContent: 'Season 3 roadmap revealed! New maps and weapons coming...',
+                    sentiment: { positive: 85, neutral: 10, negative: 5 },
+                    commentCount: 89,
+                    likes: 2500,
+                    timestamp: '2024-01-27T12:00:00',
+                    title: 'Season 3 Roadmap',
+                    content: 'Season 3 roadmap revealed! New maps and weapons coming soon.',
+                    summary: 'Players are excited about the new content.',
+                    comments: [{ user: 'Fan123', text: 'Cant wait!' }]
+                },
+                6: {
+                    icon: '<i class="fa-brands fa-telegram"></i>',
+                    color: 'text-blue-400',
+                    type: 'social media content',
+                    typeLabel: 'Social',
+                    shortContent: 'Developer Q&A session this Friday! Submit your questions...',
+                    sentiment: { positive: 60, neutral: 30, negative: 10 },
+                    commentCount: 45,
+                    likes: 890,
+                    timestamp: '2024-01-26T09:00:00',
+                    title: 'Developer Q&A',
+                    content: 'Developer Q&A session this Friday! Submit your questions now.',
+                    summary: 'Community engagement event planned.',
+                    comments: [{ user: 'GamerPro', text: 'Will attend!' }]
+                },
+                7: {
+                    icon: '<i class="fa-brands fa-discord"></i>',
+                    color: 'text-indigo-500',
+                    type: 'game/patch news',
+                    typeLabel: 'Patch News',
+                    shortContent: 'New weapon balance patch notes - major changes to AR class...',
+                    sentiment: { positive: 45, neutral: 25, negative: 30 },
+                    commentCount: 156,
+                    likes: 620,
+                    timestamp: '2024-01-24T15:00:00',
+                    title: 'Weapon Balance Patch',
+                    content: 'New weapon balance patch notes - major changes to AR class.',
+                    summary: 'Mixed reactions to the balance changes.',
+                    comments: [{ user: 'SniperMain', text: 'Nerfed my favorite gun :(' }]
+                },
+                8: {
+                    icon: '<i class="fa-brands fa-telegram"></i>',
+                    color: 'text-blue-400',
+                    type: 'social media content',
+                    typeLabel: 'Social',
+                    shortContent: 'Weekly community highlights - best plays from last week!',
+                    sentiment: { positive: 90, neutral: 8, negative: 2 },
+                    commentCount: 78,
+                    likes: 1800,
+                    timestamp: '2024-01-23T18:00:00',
+                    title: 'Community Highlights',
+                    content: 'Weekly community highlights - best plays from last week!',
+                    summary: 'Positive community response to user content.',
+                    comments: [{ user: 'VideoMaker', text: 'My clip made it!' }]
+                },
+                9: {
+                    icon: '<i class="fa-brands fa-discord"></i>',
+                    color: 'text-indigo-500',
+                    type: 'game/patch news',
+                    typeLabel: 'Patch News',
+                    shortContent: 'Anti-cheat update deployed - improved detection algorithms',
+                    sentiment: { positive: 72, neutral: 18, negative: 10 },
+                    commentCount: 34,
+                    likes: 450,
+                    timestamp: '2024-01-22T10:00:00',
+                    title: 'Anti-Cheat Update',
+                    content: 'Anti-cheat update deployed - improved detection algorithms.',
+                    summary: 'Players appreciate the security improvements.',
+                    comments: [{ user: 'FairPlay', text: 'Finally!' }]
+                },
+                10: {
+                    icon: '<i class="fa-brands fa-telegram"></i>',
+                    color: 'text-blue-400',
+                    type: 'social media content',
+                    typeLabel: 'Social',
+                    shortContent: 'Exclusive in-game event starting tomorrow - double XP weekend!',
+                    sentiment: { positive: 88, neutral: 10, negative: 2 },
+                    commentCount: 92,
+                    likes: 3200,
+                    timestamp: '2024-01-21T14:00:00',
+                    title: 'Double XP Weekend',
+                    content: 'Exclusive in-game event starting tomorrow - double XP weekend!',
+                    summary: 'Players excited for the bonus XP event.',
+                    comments: [{ user: 'XPGrinder', text: 'Time to level up!' }]
+                }
+            }
+        };
+
+        // Sort order state
+        let currentSort = 'hot'; // 'hot' or 'latest'
+
+        // Sort posts based on current sort mode
+        function getSortedPosts(posts, sort) {
+            if (sort === 'hot') {
+                // Sort by engagement (likes + comments)
+                return posts.sort((a, b) => (b.likes + b.commentCount) - (a.likes + a.commentCount));
+            } else {
+                // Sort by timestamp (newest first)
+                return posts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            }
+        }
+
+        function openPostModal(platform, postId) {
+            const data = postsData[platform][postId];
+            if (!data) return;
+
+            document.getElementById('modalPlatformIcon').innerHTML = data.icon;
+            document.getElementById('modalPostId').textContent = `Post #${postId}`;
+            document.getElementById('modalPostContent').innerHTML = `
+                <p class="font-bold text-slate-800 mb-2">${data.title}</p>
+                <p class="text-sm text-slate-600">${data.content}</p>
+            `;
+            document.getElementById('modalAiSummary').textContent = data.summary;
+
+            const commentsHtml = data.comments.map(comment => `
+                <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                    <div class="flex items-center gap-2 mb-1">
+                        <div class="w-6 h-6 rounded-full bg-indigo-200 flex items-center justify-center text-xs font-bold text-indigo-600">
+                            ${comment.user[0].toUpperCase()}
+                        </div>
+                        <span class="text-sm font-semibold text-slate-700">${comment.user}</span>
+                    </div>
+                    <p class="text-sm text-slate-600 pl-8">"${comment.text}"</p>
+                </div>
+            `).join('');
+
+            document.getElementById('modalComments').innerHTML = commentsHtml;
+            document.getElementById('postModal').classList.remove('hidden');
+        }
+
+        function closePostModal() {
+            document.getElementById('postModal').classList.add('hidden');
+        }
+
+        // Pagination state
+        let currentPage = 1;
+        const postsPerPage = 10;
+
+        // Filter state
+        let filterPlatform = '';
+        let filterType = '';
+        let filterSentiment = '';
+        let searchQuery = '';
+
+        // Get dominant sentiment
+        function getDominantSentiment(post) {
+            const s = post.sentiment;
+            if (s.positive >= s.neutral && s.positive >= s.negative) return 'positive';
+            if (s.negative >= s.neutral && s.negative >= s.positive) return 'negative';
+            return 'neutral';
+        }
+
+        // Filter posts
+        function getFilteredPosts(posts) {
+            return posts.filter(post => {
+                // Platform filter
+                if (filterPlatform && post.platform !== filterPlatform) return false;
+                // Type filter
+                if (filterType && post.type !== filterType) return false;
+                // Sentiment filter
+                if (filterSentiment && getDominantSentiment(post) !== filterSentiment) return false;
+                // Search filter
+                if (searchQuery) {
+                    const query = searchQuery.toLowerCase();
+                    const matchContent = post.shortContent && post.shortContent.toLowerCase().includes(query);
+                    const matchTitle = post.title && post.title.toLowerCase().includes(query);
+                    const matchType = post.typeLabel && post.typeLabel.toLowerCase().includes(query);
+                    if (!matchContent && !matchTitle && !matchType) return false;
+                }
+                return true;
+            });
+        }
+
+        // Render posts table
+        function renderPostsTable() {
+            const tbody = document.getElementById('postsTableBody');
+            const posts = [];
+
+            // Flatten postsData into array
+            Object.keys(postsData).forEach(platform => {
+                Object.keys(postsData[platform]).forEach(id => {
+                    posts.push({ platform, id, ...postsData[platform][id] });
+                });
+            });
+
+            // Apply filters
+            const filteredPosts = getFilteredPosts(posts);
+
+            // Sort posts based on current sort mode
+            const sortedPosts = getSortedPosts([...filteredPosts], currentSort);
+
+            // Check for warning condition
+            sortedPosts.forEach(post => {
+                post.hasWarning = post.sentiment.negative > 80 && post.commentCount > 200;
+            });
+
+            // Pagination
+            const totalPosts = sortedPosts.length;
+            const totalPages = Math.ceil(totalPosts / postsPerPage);
+            const startIndex = (currentPage - 1) * postsPerPage;
+            const endIndex = Math.min(startIndex + postsPerPage, totalPosts);
+            const pagePosts = sortedPosts.slice(startIndex, endIndex);
+
+            // Update pagination UI
+            document.getElementById('showingStart').textContent = totalPosts > 0 ? startIndex + 1 : 0;
+            document.getElementById('showingEnd').textContent = endIndex;
+            document.getElementById('totalPosts').textContent = totalPosts;
+
+            // Update pagination buttons
+            document.getElementById('btnPrevPage').disabled = currentPage <= 1;
+            document.getElementById('btnNextPage').disabled = currentPage >= totalPages || totalPages === 0;
+
+            // Render page numbers
+            const pageNumbersEl = document.getElementById('pageNumbers');
+            let pageNumbersHtml = '';
+            const maxPages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxPages / 2));
+            let endPage = Math.min(totalPages, startPage + maxPages - 1);
+            if (endPage - startPage + 1 < maxPages) {
+                startPage = Math.max(1, endPage - maxPages + 1);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const activeClass = i === currentPage ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50';
+                pageNumbersHtml += `<button class="page-btn px-3 py-1 text-sm border border-slate-200 rounded-lg ${activeClass}" data-page="${i}">${i}</button>`;
+            }
+            pageNumbersEl.innerHTML = pageNumbersHtml;
+
+            // Add click handlers to page buttons
+            document.querySelectorAll('.page-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    currentPage = parseInt(this.dataset.page);
+                    renderPostsTable();
+                });
+            });
+
+            if (pagePosts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">No posts found</td></tr>';
+                return;
+            }
+
+            const html = pagePosts.map(post => {
+                const typeColors = {
+                    'social media content': 'bg-indigo-100 text-indigo-700',
+                    'game/patch news': 'bg-orange-100 text-orange-700',
+                    'new season content': 'bg-green-100 text-green-700'
+                };
+
+                const warningBadge = post.hasWarning
+                    ? `<span class="ml-2 inline-flex items-center text-red-500 text-xs font-bold" title="High negative sentiment with high comment count"><i class="fa-solid fa-triangle-exclamation mr-1"></i>ALERT</span>`
+                    : '';
+
+                return `
+                    <tr class="hover:bg-slate-50 cursor-pointer ${post.hasWarning ? 'bg-red-50/50 border-l-4 border-l-red-500' : ''}" onclick="openPostModal('${post.platform}', ${post.id})">
+                        <td class="px-4 py-4 border-b border-slate-100 ${post.color} text-xl">${post.icon}</td>
+                        <td class="px-4 py-4 border-b border-slate-100">
+                            <span class="${typeColors[post.type]} text-xs px-2 py-1 rounded-full font-medium">${post.typeLabel}</span>
+                        </td>
+                        <td class="px-4 py-4 border-b border-slate-100 text-sm font-medium max-w-xs truncate">${post.shortContent}</td>
+                        <td class="px-4 py-4 border-b border-slate-100 text-sm">
+                            <i class="fa-solid fa-heart text-red-400 mr-1"></i> ${post.likes >= 1000 ? (post.likes/1000).toFixed(1) + 'k' : post.likes}
+                            <span class="mx-2 text-slate-300">|</span>
+                            <i class="fa-solid fa-comment text-slate-400 mr-1"></i> ${post.commentCount}${warningBadge}
+                        </td>
+                        <td class="px-4 py-4 border-b border-slate-100">
+                            <div class="flex items-center gap-1 w-32">
+                                <div class="flex-1 bg-slate-200 rounded-full h-2 flex overflow-hidden">
+                                    <div class="bg-green-400 h-full" style="width: ${post.sentiment.positive}%"></div>
+                                    <div class="bg-slate-400 h-full" style="width: ${post.sentiment.neutral}%"></div>
+                                    <div class="bg-red-400 h-full" style="width: ${post.sentiment.negative}%"></div>
+                                </div>
+                                <span class="text-xs text-slate-500">${post.sentiment.negative}%</span>
+                            </div>
+                        </td>
+                        <td class="px-4 py-4 border-b border-slate-100">
+                            <button class="text-indigo-600 text-sm font-semibold hover:underline">Analyze</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            tbody.innerHTML = html;
+        }
+
+        // Initial render
+        renderPostsTable();
+
+        // Search and filter handlers
+        document.getElementById('postSearch').addEventListener('input', function(e) {
+            searchQuery = e.target.value;
+            currentPage = 1;
+            renderPostsTable();
+        });
+
+        document.getElementById('filterPlatform').addEventListener('change', function(e) {
+            filterPlatform = e.target.value;
+            currentPage = 1;
+            renderPostsTable();
+        });
+
+        document.getElementById('filterType').addEventListener('change', function(e) {
+            filterType = e.target.value;
+            currentPage = 1;
+            renderPostsTable();
+        });
+
+        document.getElementById('filterSentiment').addEventListener('change', function(e) {
+            filterSentiment = e.target.value;
+            currentPage = 1;
+            renderPostsTable();
+        });
+
+        // Pagination button handlers
+        document.getElementById('btnPrevPage').addEventListener('click', function() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderPostsTable();
+            }
+        });
+
+        document.getElementById('btnNextPage').addEventListener('click', function() {
+            const posts = [];
+            Object.keys(postsData).forEach(platform => {
+                Object.keys(postsData[platform]).forEach(id => {
+                    posts.push({ platform, id, ...postsData[platform][id] });
+                });
+            });
+            const filteredPosts = getFilteredPosts(posts);
+            const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderPostsTable();
+            }
+        });
+
+        // Hot/Latest button handlers
+        document.getElementById('btn-hot').addEventListener('click', function() {
+            currentSort = 'hot';
+            currentPage = 1;
+            updateSortButtons();
+            renderPostsTable();
+        });
+
+        document.getElementById('btn-latest').addEventListener('click', function() {
+            currentSort = 'latest';
+            currentPage = 1;
+            updateSortButtons();
+            renderPostsTable();
+        });
+
+        function updateSortButtons() {
+            const hotBtn = document.getElementById('btn-hot');
+            const latestBtn = document.getElementById('btn-latest');
+            if (currentSort === 'hot') {
+                hotBtn.className = 'px-4 py-1 text-sm bg-indigo-600 text-white rounded-md';
+                latestBtn.className = 'px-4 py-1 text-sm bg-slate-100 text-slate-600 rounded-md hover:bg-slate-200';
+            } else {
+                hotBtn.className = 'px-4 py-1 text-sm bg-slate-100 text-slate-600 rounded-md hover:bg-slate-200';
+                latestBtn.className = 'px-4 py-1 text-sm bg-indigo-600 text-white rounded-md';
+            }
+        }
+
+        // Close modal on backdrop click
+        document.getElementById('postModal').addEventListener('click', function(e) {
+            if (e.target === this) closePostModal();
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closePostModal();
+        });
+    </script>
+</body>
+</html>
